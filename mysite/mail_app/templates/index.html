@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Список сообщений</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+            <p id="progress-text">Чтение сообщений...</p>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Отправитель</th>
+                <th>Тема</th>
+                <th>Дата отправки</th>
+                <th>Дата получения</th>
+                <th>Текст сообщения</th>
+                <th>Вложения</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>testuser1@test.ru</td>
+                <td>Встреча</td>
+                <td>2024-09-09 18:41</td>
+                <td>2024-09-09 21:01</td>
+                <td>Привет! Напоминаю о встрече в 10:00.</td>
+            </tr>
+            <tr>
+                <td>testuser2@test.ru</td>
+                <td>Доклад</td>
+                <td>2024-09-08 13:27</td>
+                <td>2024-09-09 21:01</td>
+                <td>Отправляю документ для проверки.</td>
+                <td>
+                    <a href="http://test.ru/">Какое то вложение</a>
+                </td>
+            </tr>
+            <!-- Добавьте больше сообщений по необходимости -->
+            </tbody>
+        </table>
+
+    <script src="script.js"></script>
+    </body>
+</html>
