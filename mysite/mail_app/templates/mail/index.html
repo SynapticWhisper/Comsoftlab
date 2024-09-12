@@ -1,50 +1,143 @@
 <!DOCTYPE html>
 <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Список сообщений</title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <body>
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-            <p id="progress-text">Чтение сообщений...</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сообщения</title>
+    <style>
+        /* Общие стили */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 40px auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            color: #333;
+        }
+
+        /* Прогресс-бар */
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-fill {
+            width: 0;
+            height: 20px;
+            background-color: #7a9dff;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        /* Таблица сообщений */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        td {
+            background-color: #fafafa;
+        }
+
+        .loading-text {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+            color: #7a9dff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Сообщения</h1>
+
+        <div class="progress-text">Чтение сообщений</div>
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
         </div>
 
         <table>
             <thead>
-            <tr>
-                <th>Отправитель</th>
-                <th>Тема</th>
-                <th>Дата отправки</th>
-                <th>Дата получения</th>
-                <th>Текст сообщения</th>
-                <th>Вложения</th>
-            </tr>
+                <tr>
+                    <th>Отправитель</th>
+                    <th>Тема</th>
+                    <th>Дата получения</th>
+                    <th>Текст сообщения</th>
+                    <th>Вложения</th>
+                </tr>
             </thead>
-            <tbody>
-            <tr>
-                <td>testuser1@test.ru</td>
-                <td>Встреча</td>
-                <td>2024-09-09 18:41</td>
-                <td>2024-09-09 21:01</td>
-                <td>Привет! Напоминаю о встрече в 10:00.</td>
-            </tr>
-            <tr>
-                <td>testuser2@test.ru</td>
-                <td>Доклад</td>
-                <td>2024-09-08 13:27</td>
-                <td>2024-09-09 21:01</td>
-                <td>Отправляю документ для проверки.</td>
-                <td>
-                    <a href="http://test.ru/">Какое то вложение</a>
-                </td>
-            </tr>
-            <!-- Добавьте больше сообщений по необходимости -->
+            <tbody id="message-list">
+                {% for message in messages %}
+                <tr>
+                    <td>{{ message.from_user }}</td>
+                    <td>{{ message.theme }}</td>
+                    <td>{{ message.delivery_date }}</td>
+                    <td>{{ message.message_text }}</td>
+                    <td>{{ message.attachments }}</td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
+    </div>
 
-    <script src="script.js"></script>
-    </body>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const socket = new WebSocket('ws://localhost:8000/ws/messages/');
+
+            socket.onmessage = function(event) {
+                let message = JSON.parse(event.data);
+                let newRow = `
+                    <tr>
+                        <td>${message.from_user}</td>
+                        <td>${message.theme}</td>
+                        <td>${message.delivery_date}</td>
+                        <td>${message.message_text}</td>
+                        <td>${message.attachments}</td>
+                    </tr>`;
+                $('#message-list').append(newRow);
+            };
+            socket.onerror = function(error) {
+                console.error('Ошибка WebSocket:', error);
+            };
+        });
+    </script>
+</body>
 </html>

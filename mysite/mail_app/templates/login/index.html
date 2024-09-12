@@ -53,7 +53,8 @@
         }
 
         input[type="email"]:focus,
-        input[type="password"]:focus {
+        input[type="password"]:focus,
+        #imap-server:focus {
             border-color: #7a9dff;
             outline: none;
         }
@@ -79,6 +80,18 @@
         input[type="submit"]:hover {
             background-color: #527bfa;
         }
+
+        #imap-server {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: #fafafa;
+            transition: border-color 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -93,6 +106,13 @@
 
             <label for="password">Пароль</label>
             <input type="password" name="password" id="password" required>
+
+            <label for="imap-server">Service</label>
+            <select name="imap-server" id="imap-server">
+                <option value="imap.yandex.ru">Yandex</option>
+                <option value="imap.mail.ru">Mail</option>
+                <option value="imap.gmail.com">GMail</option>
+            </select>
 
             {% if error_message %}
             <p class="error"><strong>{{ error_message }}</strong></p>

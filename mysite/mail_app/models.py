@@ -2,11 +2,12 @@ from django.db import models
 
 
 class User(models.Model):
-    username = models.EmailField(max_length=200, unique=True)
-    password = models.CharField(max_length=255)
+    email = models.EmailField(max_length=200, unique=True, null=False, blank=False)
+    password = models.CharField(max_length=255, null=False, blank=False)
+    imap_server = models.CharField(max_length=20, null=False, blank=False, default="imap.gmail.com")
 
     def __str__(self):
-        return self.username
+        return self.email
 
 
 class Message(models.Model):
