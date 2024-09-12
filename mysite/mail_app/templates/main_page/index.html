@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор аккаунта</title>
+    <style>
+        /* Общие стили */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        .account-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+
+        .account-item {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .account-item:hover {
+            background-color: #f2f2f2;
+        }
+
+        .account-item a {
+            text-decoration: none;
+            color: #7a9dff;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .account-item a:hover {
+            color: #527bfa;
+        }
+
+        .add-account-btn {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #7a9dff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .add-account-btn:hover {
+            background-color: #527bfa;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Выберите аккаунт</h1>
+
+        <ul class="account-list">
+            {% for account in accounts %}
+            <li class="account-item">
+                <span>{{ account.username }}</span>
+                <a href="{% url 'select_account' account.id %}">Войти</a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <a href="{% url 'login' %}" class="add-account-btn">Добавить аккаунт</a>
+    </div>
+
+</body>
+</html>

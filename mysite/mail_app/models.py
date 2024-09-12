@@ -1,20 +1,22 @@
-import datetime
 from django.db import models
 
 
-# Create your models here.
 class User(models.Model):
-    username: str = models.EmailField(max_length=200, unique=True)
-    password: str = models.CharField(max_length=255)
+    username = models.EmailField(max_length=200, unique=True)
+    password = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.username
 
 
 class Message(models.Model):
     message_uid = models.BinaryField(primary_key=True)
-    from_user: str = models.CharField(max_length=200)
-    theme: str = models.CharField(max_length=200)
-    dispatch_date: datetime = models.DateTimeField("dispatch date")
-    delivery_date: datetime = models.DateTimeField("delivery date")
-    message_text: str = models.TextField()
+    from_user = models.CharField(max_length=200)
+    theme = models.CharField(max_length=200)
+    delivery_date = models.DateTimeField("delivery date")
+    message_text = models.TextField()
     attachments = models.JSONField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.theme

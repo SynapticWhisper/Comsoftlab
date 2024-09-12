@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from ...config import settings
+from config import settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "mail_app.apps.MailAppConfig",
 ]
 
 MIDDLEWARE = [
@@ -77,9 +78,11 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
+        'NAME': settings.DB_NAME,
         'USER': settings.DB_USER,
         'PASSWORD': settings.DB_PASSWORD,
-        'HOST': settings.DB_URL
+        'HOST': settings.DB_HOST,
+        'PORT': settings.DB_PORT
     }
 }
 
