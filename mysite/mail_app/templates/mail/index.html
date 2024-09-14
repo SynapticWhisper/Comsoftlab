@@ -197,6 +197,10 @@
                 $('#progress-bar-fill').css('width', percentage + '%');
             }
 
+            function readingStatusUpdate(checked, total) {
+                $('#statusComplete').text(`${checked}/${total}`);
+            }
+
             // Логика получения сообщений через WebSocket
             socket.onmessage = function(event) {
                 let message = JSON.parse(event.data);
@@ -208,7 +212,7 @@
                     $('#status').text("Чтение сообщений");
                     totalMessages = message.total_messages;
                     checkedMessages = message.messages_checked;
-                    updateProgressBar(checkedMessages, totalMessages);
+                    readingStatusUpdate(checkedMessages, totalMessages);
                 } else if (messageStatus === 'sending') {
                     // Обновление полосы загрузки для новых сообщений
                     $('#status').text("Загрузка сообщений");
