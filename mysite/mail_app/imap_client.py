@@ -41,6 +41,7 @@ class IMAPService:
             return data[0].split()
         return []
     
+    @staticmethod
     def __message_to_dict(msg_uid: bytes, msg: list[tuple[bytes], bytes]) -> dict[str, str]:
         msg: Message = email.message_from_bytes(msg[0][1])
 
@@ -59,8 +60,9 @@ class IMAPService:
     def get_messages(self, new_messages_uids: list[bytes]):
         for uid in new_messages_uids:
             res, msg = self.__session.uid('fetch', uid, '(RFC822)')
+            print(uid, msg)
             if res == "OK":
-                yield self.__message_to_dict(uid, msg)
+                yield self.__message_to_dict(msg_uid=uid, msg=msg)
             else:
                 yield
 

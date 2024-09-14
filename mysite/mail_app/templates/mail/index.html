@@ -12,8 +12,9 @@
             margin: 0;
             padding: 0;
         }
-
+    
         .container {
+            position: relative;
             background-color: #ffffff;
             padding: 20px 30px;
             border-radius: 10px;
@@ -21,86 +22,145 @@
             max-width: 1200px;
             margin: 40px auto;
         }
-
+    
         h1 {
             font-size: 24px;
             text-align: center;
             color: #333;
         }
-
+    
         /* Прогресс-бар */
         .progress-bar {
+            position: relative;
             width: 100%;
+            text-align: center;
             background-color: #e0e0e0;
             border-radius: 10px;
             overflow: hidden;
             margin-bottom: 20px;
         }
-
+    
         .progress-bar-fill {
             width: 0;
-            height: 20px;
+            height: 40px;
             background-color: #7a9dff;
             transition: width 0.5s ease-in-out;
         }
-
+    
         .progress-text {
             text-align: center;
             font-size: 14px;
             color: #333;
             margin-bottom: 10px;
         }
-
+    
         /* Таблица сообщений */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-
+    
         table, th, td {
             border: 1px solid #ddd;
         }
-
+    
         th, td {
             padding: 10px;
             text-align: center;
         }
-
+    
         th {
             background-color: #f4f4f4;
         }
-
+    
         td {
             background-color: #fafafa;
         }
-
+    
         .loading-text {
             text-align: center;
             font-size: 18px;
             margin-top: 20px;
             color: #7a9dff;
         }
+    
+        /* Остальные стили */
+        .error-message {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+    
+        .sendFrom,
+        .theme {
+            width: 180px;
+        }
+        .date {
+            width: 120px;
+        }
+    
+        #statusComplete {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translate(-50%, -75%);
+        }
+
+        tbody tr td {
+            max-width: 200px;
+            white-space: nowrap; /* Отключить перенос текста */
+            overflow: hidden; /* Обрезать текст, если он выходит за пределы */
+            text-overflow: ellipsis;
+        }
+
+        /* Стиль для кнопки "Назад" */
+        .back-button {
+            position: absolute;
+            top: 32px;
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #7a9dff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #5673d1;
+        }
+
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>Сообщения</h1>
+        <a href="/mail_app" class="back-button">Назад</a>
+        <!-- Поле для отображения ошибки -->
+        <div id="error-message" class="error-message" style="display:none;"></div>
 
-        <div class="progress-text">Чтение сообщений</div>
+        <div class="progress-text" id="status"></div>
         <div class="progress-bar">
-            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            <p id="statusComplete">0</p>
+            <div class="progress-bar-fill" id="progress-bar-fill">
+            </div>
         </div>
 
         <table>
             <thead>
                 <tr>
-                    <th>Отправитель</th>
-                    <th>Тема</th>
-                    <th>Дата получения</th>
-                    <th>Текст сообщения</th>
-                    <th>Вложения</th>
+                    <th class="sendFrom">Отправитель</th>
+                    <th class="theme">Тема</th>
+                    <th class="date">Дата получения</th>
+                    <th class="text">Текст сообщения</th>
+                    <th class="attachments">Вложения</th>
                 </tr>
             </thead>
             <tbody id="message-list">
@@ -109,7 +169,7 @@
                     <td>{{ message.from_user }}</td>
                     <td>{{ message.theme }}</td>
                     <td>{{ message.delivery_date }}</td>
-                    <td>{{ message.message_text }}</td>
+                    <td>{{ message.message_text|truncatechars:50 }}</td>
                     <td>{{ message.attachments }}</td>
                 </tr>
                 {% endfor %}
@@ -120,22 +180,65 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            const socket = new WebSocket('ws://localhost:8000/ws/messages/');
+            const user_id = "{{ user_id }}";
+            const socket = new WebSocket(`ws://localhost:8000/ws/messages/${user_id}`);
+            socket.onopen = function() {
+                socket.send(JSON.stringify({message: "GET_MESSAGES"}));
+            };
+            
+            let totalMessages = 0;  // Общее количество писем
+            let checkedMessages = 0;  // Количество проверенных писем
+            let sentMessages = 0;  // Количество отправленных писем
 
+            // Функция обновления прогресс-бара
+            function updateProgressBar(checked, total) {
+                const percentage = (checked / total) * 100;
+                $('#statusComplete').text(`${checked}/${total}`);
+                $('#progress-bar-fill').css('width', percentage + '%');
+            }
+
+            // Логика получения сообщений через WebSocket
             socket.onmessage = function(event) {
                 let message = JSON.parse(event.data);
-                let newRow = `
-                    <tr>
-                        <td>${message.from_user}</td>
-                        <td>${message.theme}</td>
-                        <td>${message.delivery_date}</td>
-                        <td>${message.message_text}</td>
-                        <td>${message.attachments}</td>
-                    </tr>`;
-                $('#message-list').append(newRow);
+                let messageStatus = message.status;
+
+                if (messageStatus === 'reading') {
+                    // Чтение и проверка сообщений
+                    document.getElementById("status").innerHTML = "Чтение сообщений";
+                    $('#status').text("Чтение сообщений");
+                    totalMessages = message.total_messages;
+                    checkedMessages = message.messages_checked;
+                    updateProgressBar(checkedMessages, totalMessages);
+                } else if (messageStatus === 'sending') {
+                    // Обновление полосы загрузки для новых сообщений
+                    $('#status').text("Загрузка сообщений");
+                    sentMessages = message.sent_messages;
+                    totalMessages = message.total_messages;
+                    updateProgressBar(sentMessages, totalMessages);
+
+                    // Добавление нового сообщения в таблицу
+                    let newRow = `
+                        <tr>
+                            <td>${message.message.from_user}</td>
+                            <td>${message.message.theme}</td>
+                            <td>${message.message.delivery_date}</td>
+                            <td>${message.message.message_text.substring(0, 50)}...</td>
+                            <td>${message.message.attachments}</td>
+                        </tr>`;
+                    $('#message-list').prepend(newRow);
+                } else if (messageStatus === 'complete') {
+                    // Процесс завершён, прогресс-бар заполнен
+                    $('#status').text("Загрузка завершена");
+                    updateProgressBar(totalMessages, totalMessages);
+                } else if (messageStatus === 'error') {
+                    // Отображение сообщения об ошибке
+                    $('#error-message').text('Ошибка: ' + message.message).show();
+                }
             };
+
+            // Обработка ошибок WebSocket
             socket.onerror = function(error) {
-                console.error('Ошибка WebSocket:', error);
+                $('#error-message').text('Ошибка WebSocket: ' + error.message).show();
             };
         });
     </script>

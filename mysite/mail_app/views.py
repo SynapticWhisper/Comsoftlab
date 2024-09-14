@@ -1,8 +1,8 @@
 from http.client import HTTPException
 from django.db import IntegrityError
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.http import HttpResponseRedirect
+
 
 from .imap_client import IMAPService
 from .models import User, Message
@@ -14,22 +14,33 @@ def index(request):
     context = {
         'accounts': accounts,
     }
-    return render(request, "main_page/index.html", context)
+    return render(request, "home/index.html", context)
 
 
-def login(request):
-    return render(request, "login/index.html")
-
-
-def select_account(request, account_id):
-    messages = Message.objects.filter(user=account_id).order_by("-delivery_date")[:20]
+def select_account(request, user_id):
+    messages = Message.objects.filter(user=user_id).order_by("-delivery_date")[:20]
+    messages = [
+        {
+            'message_uid': message.message_uid.tobytes(),
+            'from_user': message.from_user,
+            'theme': message.theme,
+            'delivery_date': message.delivery_date.strftime('%d %b %Y %H:%M:%S'),
+            'message_text': message.message_text,
+            'attachments': message.attachments
+        } for message in messages
+    ]
     context = {
+        'user_id': user_id,
         'messages': messages
     }
     return render(request, "mail/index.html", context)
 
 
-def register(request):
+def sign_in(request):
+    return render(request, "auth/index.html")
+
+
+def sign_up(request):
     email = request.POST.get("email")
     password = request.POST.get("password")
     imap_server = request.POST.get("imap-server")
@@ -42,7 +53,7 @@ def register(request):
     except HTTPException:
         return render(
             request,
-            "login/index.html",
+            "auth/index.html",
             {
                 "error_message": "Incorrect email or password",
             },
@@ -50,7 +61,7 @@ def register(request):
     except IntegrityError:
         return render(
             request,
-            "login/index.html",
+            "auth/index.html",
             {
                 "error_message": "Accaunt already exists",
             },

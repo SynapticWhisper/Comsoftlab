@@ -17,6 +17,7 @@
         }
 
         .container {
+            position: relative;
             background-color: #ffffff;
             padding: 20px 30px;
             border-radius: 10px;
@@ -92,11 +93,32 @@
             background-color: #fafafa;
             transition: border-color 0.3s;
         }
+        /* Стиль для кнопки "Назад" */
+        .back-button {
+            position: absolute;
+            top: 32px;
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #7a9dff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #5673d1;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <a href="/mail_app" class="back-button">Назад</a>
         <form action="{% url 'register' %}" method="post">
             {% csrf_token %}
             <h1>Регистрация</h1>

@@ -19,10 +19,11 @@ class MailConsumer(WebsocketConsumer):
 
         self.accept()
 
+
     def __get_new_messages_from_uid(self, last_seen_message_uid: Optional[bytes]) -> list[bytes]:
         messages_uids = self.imap_service.get_messages_uids()
         start, stop = 0, len(messages_uids) - 1
-        
+
         total_checked = 0
 
         self.send(text_data=json.dumps({
@@ -53,16 +54,15 @@ class MailConsumer(WebsocketConsumer):
         
         return []
 
-    def receive(self, message):
+    def receive(self, text_data):
         try:
-            data = json.loads(message)
-            if data.get('message') != 'HELLO':
+            data = json.loads(text_data)
+            if data.get('message') != 'GET_MESSAGES':
                 return
             
             last_message: Message = Message.objects.filter(user=self.user.id).order_by("-delivery_date").first()
-            last_message_uid = last_message.message_uid if last_message else None
+            last_message_uid = last_message.message_uid.tobytes() if last_message else None
             new_messages_uids = self.__get_new_messages_from_uid(last_message_uid)
-
             message_batch = []
             sent_messages = 0
 
@@ -75,7 +75,7 @@ class MailConsumer(WebsocketConsumer):
                         'message_uid': message["message_uid"].decode('utf-8'),
                         'from_user': message["from_user"],
                         'theme': message["theme"],
-                        'delivery_date': message["delivery_date"].strftime('%Y-%m-%d %H:%M:%S'),
+                        'delivery_date': message["delivery_date"].strftime('%d %b %Y %H:%M:%S'),
                         'message_text': message["message_text"],
                         'attachments': message["attachments"]
                     }
